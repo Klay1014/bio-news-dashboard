@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  # 1. 資料庫
+  db:
+    image: postgres:15
+    container_name: bio_news_db
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: bio_news
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d bio_news"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # 2. 管理介面
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - "8080:8080"
+
+  # 3. ETL 機器人
+  etl_worker:
+    build: ./etl
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # 4. 新增：前端戰情室
+  dashboard:
+    build: ./dashboard
+    ports:
+      - "8501:8501"  # 左邊是瀏覽器網址列用的 port
+    depends_on:
+      db:
+        condition: service_healthy
