@@ -1,3 +1,4 @@
+import os
 import streamlit as st
 import pandas as pd
 from sqlalchemy import create_engine
@@ -10,7 +11,7 @@ st.title("🧬 生醫新聞戰情室 (Bio-News Dashboard)")
 st.markdown("這是由 **Python ETL** 自動抓取並存入 **PostgreSQL** 的即時資料。")
 
 # 資料庫連線設定 (跟 ETL 一樣，host 是 'db')
-DB_URI = "postgresql://user:password@db:5432/bio_news"
+DB_URI = os.getenv("DB_URI", "postgresql://user:password@db:5432/bio_news")
 
 def load_data():
     """從資料庫撈取最新的新聞"""

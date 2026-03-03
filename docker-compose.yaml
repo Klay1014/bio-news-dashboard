@@ -6,15 +6,15 @@ services:
     image: postgres:15
     container_name: bio_news_db
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: bio_news
+      POSTGRES_USER: ${POSTGRES_USER:-user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_DB: ${POSTGRES_DB:-bio_news}
     ports:
       - "5432:5432"
     volumes:
       - ./postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U user -d bio_news"]
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -29,6 +29,8 @@ services:
   # 3. ETL 機器人
   etl_worker:
     build: ./etl
+    environment:
+      DB_URI: postgresql://${POSTGRES_USER:-user}:${POSTGRES_PASSWORD:-password}@db:5432/${POSTGRES_DB:-bio_news}
     depends_on:
       db:
         condition: service_healthy
@@ -36,6 +38,8 @@ services:
   # 4. 新增：前端戰情室
   dashboard:
     build: ./dashboard
+    environment:
+      DB_URI: postgresql://${POSTGRES_USER:-user}:${POSTGRES_PASSWORD:-password}@db:5432/${POSTGRES_DB:-bio_news}
     ports:
       - "8501:8501"  # 左邊是瀏覽器網址列用的 port
     depends_on:

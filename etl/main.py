@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 import feedparser
 from sqlalchemy import create_engine
@@ -7,7 +8,7 @@ import time
 RSS_URL = "https://rss.nytimes.com/services/xml/rss/nyt/Health.xml"
 
 # 2. 設定倉庫位置：注意 host 是 'db' (因為在 Docker 網路內)
-DB_URI = "postgresql://user:password@db:5432/bio_news"
+DB_URI = os.getenv("DB_URI", "postgresql://user:password@db:5432/bio_news")
 
 def get_news():
     print(f"開始抓取新聞: {RSS_URL}...")
